@@ -1,18 +1,30 @@
 "use client";
 import SearchBar from '@/components/searchbar'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image';
 import Result from '@/components/members/result';
 
 function page() {
-    const data = ["Jan", "Anna", "Piotr", "Kasia"];
-    const [searchText, setSearchText] = useState("");
+  const data = ["Jan", "Anna", "Piotr", "Kasia"];
+  const [members, setMembers] = useState<any[]>([]);
+  const [searchText, setSearchText] = useState("");
 
-    const filtered = data.filter(name =>
-      name.toLowerCase().includes(searchText.toLowerCase())
-    );
+  useEffect(() => {
+  fetch("http://localhost:8000/api/lista-czlonkow/")
+    .then(res => res.json())
+    .then(data => {
+      setMembers(data);
+    })
+    .catch(err => console.error("Błąd pobierania:", err));
+  }, []);
 
-    const handleSearch = (value: string) => {
+  const filtered = members.filter(member =>
+    `${member.czlonek_imie} ${member.czlonek_nazwisko}`
+      .toLowerCase()
+      .includes(searchText.toLowerCase())
+  );
+
+  const handleSearch = (value: string) => {
     setSearchText(value);
     console.log("Wpisany tekst:", value);
   };
@@ -43,8 +55,20 @@ function page() {
       </div>  
 
         <div className="flex-1 flex flex-col overflow-auto">
-            <Result/>
-             <Result/>
+          <Result/>
+          <Result/>
+            {filtered.map((member, index) => (
+            <div key={index} className="grid grid-cols-[40px_15%_10%_10%_10%_15%_15%_15%_auto] p-2 border-b border-gray-200">
+              <input type="checkbox" />
+              <div>{member.czlonek_imie} {member.czlonek_nazwisko}</div>
+              <div>{member.indeks}</div>
+              <div>{member.telefon || "-"}</div>
+              <div>{member.sekcja_nazwa || "-"}</div>
+              <div>{member.projekt_nazwa || "-"}</div>
+              <div>{member.kierunek_nazwa || "-"}</div>
+              <div>...</div>
+            </div>
+            ))}
         </div>
         <div className="px-4 py-4 border-t border-gray-300 rounded-b-lg bg-[#F4F2FF] items-center text-sm text-[#6E6893] flex gap-15">
           <div className='flex ml-auto items-center '>
@@ -59,12 +83,6 @@ function page() {
           </div>
         </div>
         
-        {/* {filtered.map((name, index) => (
-          <div key={index} className="p-2 border-b border-gray-200">
-            {name}
-
-          </div>
-        ))} */}
  
     </div>
   )
