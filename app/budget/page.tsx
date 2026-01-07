@@ -2,6 +2,7 @@
 import SearchBar from '@/components/searchbar'
 import React, { useState } from 'react'
 import Image from 'next/image';
+import Result from '@/components/budget/result';
 
 function page() {
     const data = ["Jan", "Anna", "Piotr", "Kasia"];
@@ -68,26 +69,12 @@ function page() {
       </div>  
        <div className='flex flex-1 border-gray-300 '>
         <div className='flex-1 flex flex-col border-r border-gray-300 '>
-          <div className="px-4 p-2 border-b border-gray-300 bg-white 
-          grid grid-cols-[20%_20%_20%_20%_auto] items-center text-sm text-[#6E6893]">
-            <div className='flex flex-col  justify-center'>
-              <div className=''>5000 zl</div> 
-              <div >PLN</div> 
-            </div>
-            <div className='flex items-center'>Od dziekana</div> 
-            <div className='flex flex-col '>
-              <div className=''>5000 zl</div> 
-              <div >PLN</div> 
-            </div>
-            <div className='flex items-center '>02.03.2025</div> 
-            <div className='flex ml-auto items-center gap-4'>
-              <Image src="/pen.png" alt="Search Icon" width={20} height={20} className='cursor-pointer transition duration-200 hover:brightness-60'/>
-              <Image src="/trash.png" alt="Search Icon" width={20} height={20} className='cursor-pointer transition duration-200 hover:brightness-60'/>
-            </div>
-          </div>  
+ 
+          <Result/>
+          
         </div>
-        <div className='flex-1 flex justify-end items-center border-l border-gray-300'>
-          druga kolumna
+        <div className='flex-1 flex flex-col border-l border-gray-300 '>
+          <Result/>
         </div>
       </div>
       <div className="px-4 py-4 border-t border-gray-300 rounded-b-lg bg-[#F4F2FF] items-center text-sm text-[#6E6893] flex gap-15">
