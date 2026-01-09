@@ -9,6 +9,9 @@ function page() {
   const [members, setMembers] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
 
   useEffect(() => {
   fetch("http://localhost:8000/api/lista-czlonkow/")
@@ -25,10 +28,26 @@ function page() {
       .includes(searchText.toLowerCase())
   );
 
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const pageResults = filtered.slice(startIndex, endIndex);
+
   const handleSearch = (value: string) => {
     setSearchText(value);
     console.log("Wpisany tekst:", value);
   };
+
+  const handleNext = () => {
+    if(endIndex < filtered.length){
+      setPage(prev => prev + 1)
+    }
+  }
+
+  const handlePrev = () => {
+    if(page > 1){
+      setPage(prev => prev - 1)
+    }
+  }
 
   return (
     <div className='bg-white text-[#6D5BD0] h-screen flex flex-col rounded-lg border border-gray-300'>
@@ -56,7 +75,7 @@ function page() {
       </div>  
 
         <div className="flex-1 flex flex-col overflow-auto">
-            {filtered.map((member, index) => (
+            {pageResults.map((member, index) => (
             // <div key={index} className="grid grid-cols-[40px_15%_10%_10%_10%_15%_15%_15%_auto] p-2 border-b border-gray-200">
             //   <input type="checkbox" />
             //   <div>{member.czlonek_imie} {member.czlonek_nazwisko}</div>
@@ -66,7 +85,16 @@ function page() {
             //   <div>{member.projekt_nazwa || "-"}</div>
             //   <div>{member.kierunek_nazwa || "-"}</div>
             //   <div>...</div>
-              <Result key={index} indeks={member.indeks} imie={member.czlonek_imie} nazwisko={member.czlonek_nazwisko} email={member.email} telefon={member.telefon} sekcje={member.sekcja_nazwa} projekty={member.projekt_nazwa} kierunek={member.kierunek_nazwa}/>
+              <Result 
+              key={index} 
+              indeks={member.indeks} 
+              imie={member.czlonek_imie} 
+              nazwisko={member.czlonek_nazwisko} 
+              email={member.email} telefon={member.telefon} 
+              sekcje={member.sekcja_nazwa} 
+              projekty={member.projekt_nazwa} 
+              kierunek={member.kierunek_nazwa}
+              />
             // </div>
             ))}
         </div>
@@ -78,8 +106,8 @@ function page() {
             1-10 z 100
           </div>
           <div className='flex items-center gap-8'>
-            <Image src="/left.png" alt="Search Icon" width={5} height={5} className='cursor-pointer transition duration-200 hover:brightness-60'/>
-            <Image src="/right.png" alt="Search Icon" width={5} height={5} className='cursor-pointer transition duration-200 hover:brightness-60'/>
+            <Image src="/left.png" alt="Search Icon" width={5} height={5} onClick={handlePrev} className='cursor-pointer transition duration-200 hover:brightness-60'/>
+            <Image src="/right.png" alt="Search Icon" width={5} height={5} onClick={handleNext} className='cursor-pointer transition duration-200 hover:brightness-60'/>
           </div>
         </div>
         
