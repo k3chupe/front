@@ -103,7 +103,7 @@ function page() {
             wierwsze na strone: 10
           </div>
           <div>
-            1-10 z 100
+            {1+(page-1)*10}-{10+(page-1)*10}
           </div>
           <div className='flex items-center gap-8'>
             <Image src="/left.png" alt="Search Icon" width={5} height={5} onClick={handlePrev} className='cursor-pointer transition duration-200 hover:brightness-60'/>
