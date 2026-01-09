@@ -3,18 +3,19 @@ import SearchBar from '@/components/searchbar'
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image';
 import Result from '@/components/members/result';
+import AddModal from '@/components/members/addModal';
 
 function page() {
-  const data = ["Jan", "Anna", "Piotr", "Kasia"];
   const [members, setMembers] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
   fetch("http://localhost:8000/api/lista-czlonkow/")
     .then(res => res.json())
-    .then(data => {
-      setMembers(data);
-    })
+  .then(data => {
+    setMembers(data.results || []);
+  })
     .catch(err => console.error("Błąd pobierania:", err));
   }, []);
 
@@ -33,7 +34,7 @@ function page() {
     <div className='bg-white text-[#6D5BD0] h-screen flex flex-col rounded-lg border border-gray-300'>
       <div className='w-100 p-4 flex w-full justify-between'>
       <SearchBar placeholder="Szukaj w bazie członków..." onSearch={handleSearch} />
-      <div className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
+      <div onClick={() =>setIsOpen(true)} className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
         Dodaj członka
       </div>
       </div>  
@@ -55,19 +56,18 @@ function page() {
       </div>  
 
         <div className="flex-1 flex flex-col overflow-auto">
-          <Result/>
-          <Result/>
             {filtered.map((member, index) => (
-            <div key={index} className="grid grid-cols-[40px_15%_10%_10%_10%_15%_15%_15%_auto] p-2 border-b border-gray-200">
-              <input type="checkbox" />
-              <div>{member.czlonek_imie} {member.czlonek_nazwisko}</div>
-              <div>{member.indeks}</div>
-              <div>{member.telefon || "-"}</div>
-              <div>{member.sekcja_nazwa || "-"}</div>
-              <div>{member.projekt_nazwa || "-"}</div>
-              <div>{member.kierunek_nazwa || "-"}</div>
-              <div>...</div>
-            </div>
+            // <div key={index} className="grid grid-cols-[40px_15%_10%_10%_10%_15%_15%_15%_auto] p-2 border-b border-gray-200">
+            //   <input type="checkbox" />
+            //   <div>{member.czlonek_imie} {member.czlonek_nazwisko}</div>
+            //   <div>{member.indeks}</div>
+            //   <div>{member.telefon || "-"}</div>
+            //   <div>{member.sekcja_nazwa || "-"}</div>
+            //   <div>{member.projekt_nazwa || "-"}</div>
+            //   <div>{member.kierunek_nazwa || "-"}</div>
+            //   <div>...</div>
+              <Result key={index} indeks={member.indeks} imie={member.czlonek_imie} nazwisko={member.czlonek_nazwisko} email={member.email} telefon={member.telefon} sekcje={member.sekcja_nazwa} projekty={member.projekt_nazwa} kierunek={member.kierunek_nazwa}/>
+            // </div>
             ))}
         </div>
         <div className="px-4 py-4 border-t border-gray-300 rounded-b-lg bg-[#F4F2FF] items-center text-sm text-[#6E6893] flex gap-15">
@@ -83,7 +83,7 @@ function page() {
           </div>
         </div>
         
- 
+      {isOpen && <AddModal onClose={() => setIsOpen(false)} />}
     </div>
   )
 }

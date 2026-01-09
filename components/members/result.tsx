@@ -1,7 +1,18 @@
 import React from 'react'
 import Image from 'next/image';
 
-function result() {
+interface ResultProps {
+  indeks?: number,
+  imie?: string,
+  nazwisko?: string,
+  email?: string,
+  telefon?: number,
+  sekcje?: string,
+  projekty?: string,
+  kierunek?: string,
+}
+
+function result({indeks, imie, nazwisko, email, telefon, sekcje, projekty, kierunek}: ResultProps) {
   return (
           <div className="">
             <div className="px-4 p-2 border-b border-gray-200 text-[#6E6893]
@@ -10,14 +21,14 @@ function result() {
                 <input type="checkbox" />
               </div>
               <div>
-                <div className='text-[#25213B] text-md'>Imie</div>
-                <div>email</div>
+                <div className='text-[#25213B] text-md'>{imie} {nazwisko}</div>
+                <div>{email}</div>
               </div>
-              <div className='text-sm'>Indeks</div>
-              <div className='text-sm'>Telefon</div>
+              <div className='text-sm'>{indeks}</div>
+              <div className='text-sm'>{telefon}</div>
               <div className='bg-[#CDFFCD] mr-auto px-1 rounded-[100px] flex items-center gap-1 text-sm pr-2'>
                 <div className="w-[6px] h-[6px] bg-[#007F00] rounded-full"></div>
-                sekcje
+                {sekcje}      
               </div>
               <div className='bg-[#E6E6F2] mr-auto px-1 rounded-lg flex items-center gap-1 text-sm pr-2'>
                 <div className="w-[6px] h-[6px] bg-[#4A4AFF] rounded-full"></div>
