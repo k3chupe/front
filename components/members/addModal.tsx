@@ -36,12 +36,39 @@ function addModal({onClose}: ModalProps) {
   const [isSekcjaModalOpen, setIsSekcjaModalOpen] = useState(false);
   const [isProjektModalOpen, setIsProjektModalOpen] = useState(false);
 
+  const [selectedImie, setSelectedImie] = useState("");
+  const [selectedNazwisko, setSelectedNazwisko] = useState("");
+  const [selectedIndeks, setSelectedIndeks] = useState(0);
+  const [selectedTelefon, setSelectedTelefon] = useState(0);
+
+  const [selectedMail, setSelectedMail] = useState("");
   const [selectedKierunek, setSelectedKierunek] = useState("");
   const [selectedSekcja, setSelectedSekcja] = useState("");
   const [selectedProjekt, setSelectedProjekt] = useState("");
   const [kierunki, setKierunki] = useState<string[]>([]);
   const [projekty, setProjekty] = useState<string[]>([]);
   const [sekcje, setSekcje] = useState<string[]>([]);
+
+  const addMember = async (imie: string, nazwisko: string, indeks: number, telefon: number, sekcja: string, projekt: string, kierunek: string) => {
+    try {
+      const res = await fetch("http://localhost:8000/api/czlonkowie/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({imie, nazwisko, indeks, telefon, kierunek, sekcja, projekt}),
+      });
+
+      if (!res.ok) throw new Error("Błąd dodawania kierunku");
+
+      const data = await res.json();
+    
+      setProjekty((prev) => [...prev, data.nazwa]);
+      setIsProjektModalOpen(false); 
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const addKierunek = async (nazwa: string, opis: string) => {
   try {
@@ -50,7 +77,10 @@ function addModal({onClose}: ModalProps) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ nazwa, opis }),
+      body: JSON.stringify({ 
+        nazwa,
+        opis 
+        }),
     });
 
     if (!res.ok) throw new Error("Błąd dodawania kierunku");
@@ -106,27 +136,6 @@ const addProjekt = async (nazwa: string, opis: string) => {
   }
 };
 
-const addMember = async (imie: string, nazwisko: string, indeks: number, telefon: number, sekcja: string, projekt: string, kierunek: string) => {
-  try {
-    const res = await fetch("http://localhost:8000/api/projekty/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({imie, nazwisko, indeks, telefon, sekcja, projekt, kierunek}),
-    });
-
-    if (!res.ok) throw new Error("Błąd dodawania kierunku");
-
-    const data = await res.json();
-   
-    setProjekty((prev) => [...prev, data.nazwa]);
-    setIsProjektModalOpen(false); 
-  } catch (err) {
-    console.error(err);
-  }
-};
-
 
 
   useEffect(() => {
@@ -167,24 +176,39 @@ const addMember = async (imie: string, nazwisko: string, indeks: number, telefon
             type="text" 
             placeholder="Imię" 
             className="border border-gray-300 rounded p-2 mt-2 w-full"
+            value={selectedImie}
+            onChange={(e) => setSelectedImie(e.target.value)}
           />
           <input 
             type="text" 
             placeholder="Nazwisko" 
             className="border border-gray-300 rounded p-2 mt-2 w-full"
+            value={selectedNazwisko}
+            onChange={(e) => setSelectedNazwisko(e.target.value)}
           />
         </div>
+          <input 
+            type="text" 
+            placeholder="e-mail" 
+            className="border border-gray-300 rounded p-2 mt-2 w-full"
+            value={selectedMail}
+            onChange={(e) => setSelectedMail(e.target.value)}
+          />
 
         <input 
-          type="text" 
+           type="number" 
           placeholder="Indeks" 
           className="border border-gray-300 rounded p-2 mt-2 w-full"
+          value={selectedIndeks}
+          onChange={(e) => setSelectedIndeks(e.target.value === "" ? 0 : Number(e.target.value))}
         />
 
         <input 
-          type="text" 
+          type="tel"
           placeholder="Numer telefonu" 
           className="border border-gray-300 rounded p-2 mt-2 w-full"
+          value={selectedTelefon}
+          onChange={(e) => setSelectedTelefon(e.target.value === "" ? 0 : Number(e.target.value))}
         />
         <Select
           label="Wybierz sekcję"
@@ -208,7 +232,11 @@ const addMember = async (imie: string, nazwisko: string, indeks: number, telefon
           onAddNew={() => setIsKierunekModalOpen(true)}
         />
         <div className='flex w-full justify-between mt-2'>
-          <div onClick={() =>onClose()} className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
+          <div onClick={() =>{
+            onClose();
+            addMember(selectedImie, selectedNazwisko, selectedIndeks, selectedTelefon, selectedSekcja, selectedProjekt, selectedKierunek);
+          }} 
+            className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
               dodaj
           </div>
           <div onClick={() =>onClose()} className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
