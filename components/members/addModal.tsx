@@ -31,44 +31,55 @@ type Sekcje = {
 
 
 function addModal({onClose}: ModalProps) {
-  const [openKierunekSelect, setOpenKierunekSelect] = useState(false);
   const [isKierunekModalOpen, setIsKierunekModalOpen] = useState(false);
   const [isSekcjaModalOpen, setIsSekcjaModalOpen] = useState(false);
   const [isProjektModalOpen, setIsProjektModalOpen] = useState(false);
 
   const [selectedImie, setSelectedImie] = useState("");
   const [selectedNazwisko, setSelectedNazwisko] = useState("");
-  const [selectedIndeks, setSelectedIndeks] = useState(0);
-  const [selectedTelefon, setSelectedTelefon] = useState(0);
+const [selectedIndeks, setSelectedIndeks] = useState<number | "">("");
+const [selectedTelefon, setSelectedTelefon] = useState<number | "">("");
+
 
   const [selectedMail, setSelectedMail] = useState("");
-  const [selectedKierunek, setSelectedKierunek] = useState("");
-  const [selectedSekcja, setSelectedSekcja] = useState("");
-  const [selectedProjekt, setSelectedProjekt] = useState("");
-  const [kierunki, setKierunki] = useState<string[]>([]);
-  const [projekty, setProjekty] = useState<string[]>([]);
-  const [sekcje, setSekcje] = useState<string[]>([]);
+  const [selectedKierunek, setSelectedKierunek] = useState<number | null>(null);
+  const [selectedSekcja, setSelectedSekcja] = useState<number | null>(null);
+  const [selectedProjekt, setSelectedProjekt] = useState<number | null>(null);
+  const [kierunki, setKierunki] = useState<Kierunek[]>([]);
+  const [projekty, setProjekty] = useState<Projekt[]>([]);
+  const [sekcje, setSekcje] = useState<Sekcje[]>([]);
+  
+const addMember = async () => {
+  try {
+    const payload = {
+      imie: selectedImie,
+      nazwisko: selectedNazwisko,
+      e_mail: selectedMail,
+      indeks: selectedIndeks || null,
+      telefon: selectedTelefon || null,
+      kierunek: selectedKierunek,
+      sekcja: selectedSekcja,
+      projekt: selectedProjekt,
+    };
 
-  const addMember = async (imie: string, nazwisko: string, indeks: number, telefon: number, sekcja: string, projekt: string, kierunek: string) => {
-    try {
-      const res = await fetch("http://localhost:8000/api/czlonkowie/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({imie, nazwisko, indeks, telefon, kierunek, sekcja, projekt}),
-      });
+    const res = await fetch("http://localhost:8000/api/czlonkowie/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-      if (!res.ok) throw new Error("Błąd dodawania kierunku");
-
-      const data = await res.json();
-    
-      setProjekty((prev) => [...prev, data.nazwa]);
-      setIsProjektModalOpen(false); 
-    } catch (err) {
+    if (!res.ok) {
+      const err = await res.json();
       console.error(err);
+      return;
     }
-  };
+
+    onClose();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const addKierunek = async (nazwa: string, opis: string) => {
   try {
@@ -87,7 +98,7 @@ function addModal({onClose}: ModalProps) {
 
     const data = await res.json();
     
-    setKierunki((prev) => [...prev, data.nazwa]);
+    setKierunki(prev => [...prev, data]);
     setIsKierunekModalOpen(false); 
   } catch (err) {
     console.error(err);
@@ -108,7 +119,7 @@ const addSekcja = async (nazwa: string, opis: string) => {
 
     const data = await res.json();
     
-    setSekcje((prev) => [...prev, data.nazwa]);
+    setSekcje(prev => [...prev, data]);
     setIsSekcjaModalOpen(false);
   } catch (err) {
     console.error(err);
@@ -129,7 +140,7 @@ const addProjekt = async (nazwa: string, opis: string) => {
 
     const data = await res.json();
     
-    setProjekty((prev) => [...prev, data.nazwa]);
+    setProjekty(prev => [...prev, data]);
     setIsProjektModalOpen(false); 
   } catch (err) {
     console.error(err);
@@ -140,33 +151,26 @@ const addProjekt = async (nazwa: string, opis: string) => {
 
   useEffect(() => {
     fetch("http://localhost:8000/api/kierunki/")
-      .then((res) => res.json())
-      .then((data) => {
-        const names = data.results.map((k: Kierunek) => k.nazwa);
-        setKierunki(names);
-      })
+      .then(res => res.json())
+      .then(data => setKierunki(data.results))
       .catch((err) => console.error("Błąd pobierania kierunków:", err));
   }, []);
 
   useEffect(() => {
     fetch("http://localhost:8000/api/projekty/")
-    .then((res) => res.json())
-    .then((data) =>{
-      const names = data.results.map((p: Projekt) => p.nazwa);
-      setProjekty(names);
-    })
-    .catch((err) => console.error("Błąd pobierania projektów:", err))
-   }, []);
+      .then(res => res.json())
+      .then(data => setProjekty(data.results))
+      .catch(err => console.error(err));
+  }, []);
 
-    useEffect(() => {
+
+  useEffect(() => {
     fetch("http://localhost:8000/api/sekcje/")
-    .then((res) => res.json())
-    .then((data) =>{
-      const names = data.results.map((s: Sekcje) => s.nazwa);
-      setSekcje(names);
-    })
-    .catch((err) => console.error("Błąd pobierania projektów:", err))
-   }, []);
+      .then(res => res.json())
+      .then(data => setSekcje(data.results))
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <div onClick={() => onClose()} className='fixed bg-black/50 inset-0 flex justify-center items-center'>
       <div className='bg-white flex flex-col p-6 rounded-lg' onClick={(e) => e.stopPropagation()}>
@@ -200,7 +204,11 @@ const addProjekt = async (nazwa: string, opis: string) => {
           placeholder="Indeks" 
           className="border border-gray-300 rounded p-2 mt-2 w-full"
           value={selectedIndeks}
-          onChange={(e) => setSelectedIndeks(e.target.value === "" ? 0 : Number(e.target.value))}
+          onChange={(e) =>
+            setSelectedIndeks(
+              e.target.value === "" ? "" : Number(e.target.value)
+            )
+          }
         />
 
         <input 
@@ -208,33 +216,49 @@ const addProjekt = async (nazwa: string, opis: string) => {
           placeholder="Numer telefonu" 
           className="border border-gray-300 rounded p-2 mt-2 w-full"
           value={selectedTelefon}
-          onChange={(e) => setSelectedTelefon(e.target.value === "" ? 0 : Number(e.target.value))}
+          onChange={(e) =>
+            setSelectedTelefon(
+              e.target.value === "" ? "" : Number(e.target.value)
+            )
+          }      
         />
         <Select
           label="Wybierz sekcję"
-          options={sekcje}
+          options={sekcje.map(s => ({
+            label: s.nazwa,
+            value: s.id
+          }))}
           value={selectedSekcja}
-          onChange={(v) => setSelectedSekcja(v)}
+          onChange={setSelectedSekcja}
           onAddNew={() => setIsSekcjaModalOpen(true)}
         />
+
           <Select
-          label="Wybierz projekt"
-          options={projekty}
-          value={selectedProjekt}
-          onChange={(v) => setSelectedProjekt(v)}
-          onAddNew={() => setIsProjektModalOpen(true)}
-        />
+            label="Wybierz projekt"
+            options={projekty.map(p => ({
+              label: p.nazwa,
+              value: p.id
+            }))}
+            value={selectedProjekt}
+            onChange={setSelectedProjekt}
+            onAddNew={() => setIsProjektModalOpen(true)}
+          />
+
           <Select
-          label="Wybierz kierunek"
-          options={kierunki}
-          value={selectedKierunek}
-          onChange={(v) => setSelectedKierunek(v)}
-          onAddNew={() => setIsKierunekModalOpen(true)}
-        />
+            label="Wybierz kierunek"
+            options={kierunki.map(k => ({
+              label: k.nazwa,
+              value: k.id
+            }))}
+            value={selectedKierunek}
+            onChange={setSelectedKierunek}
+            onAddNew={() => setIsKierunekModalOpen(true)}
+          />
+
         <div className='flex w-full justify-between mt-2'>
           <div onClick={() =>{
             onClose();
-            addMember(selectedImie, selectedNazwisko, selectedIndeks, selectedTelefon, selectedSekcja, selectedProjekt, selectedKierunek);
+            addMember();
           }} 
             className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
               dodaj

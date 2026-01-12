@@ -3,16 +3,30 @@
 import Image from "next/image";
 import { useState } from "react";
 
-type CustomSelectProps = {
+type SelectOption = {
   label: string;
-  options: string[];
-  onAddNew?: () => void;
-  onChange?: (value: string) => void;
-  value?: string;
+  value: number;
 };
 
-export default function CustomSelect({ label, options, onAddNew, onChange, value }: CustomSelectProps) {
+type CustomSelectProps = {
+  label: string;
+  options: SelectOption[];
+  onAddNew?: () => void;
+  onChange?: (value: number) => void;
+  value?: number | null;
+};
+
+export default function CustomSelect({
+  label,
+  options,
+  onAddNew,
+  onChange,
+  value
+}: CustomSelectProps) {
   const [open, setOpen] = useState(false);
+
+  const selectedLabel =
+    options.find(opt => opt.value === value)?.label;
 
   return (
     <div className="relative w-full mt-2">
@@ -20,7 +34,7 @@ export default function CustomSelect({ label, options, onAddNew, onChange, value
         className="border border-gray-300 rounded p-2 cursor-pointer bg-white flex justify-between items-center"
         onClick={() => setOpen(!open)}
       >
-        <span>{value ? value : label}</span>
+        <span>{selectedLabel || label}</span>
 
         <Image
           src="/down-arrow.png"
@@ -33,16 +47,16 @@ export default function CustomSelect({ label, options, onAddNew, onChange, value
 
       {open && (
         <div className="absolute w-full border bg-white rounded shadow z-10">
-          {options.map((opt) => (
+          {options.map(opt => (
             <div
-              key={opt}
+              key={opt.value}
               className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
               onClick={() => {
-                onChange?.(opt);
+                onChange?.(opt.value);
                 setOpen(false);
               }}
             >
-              {opt}
+              {opt.label}
             </div>
           ))}
 
@@ -55,6 +69,7 @@ export default function CustomSelect({ label, options, onAddNew, onChange, value
               }}
             >
               <Image src="/add.png" width={14} height={14} alt="add" />
+              <span>Dodaj nowy</span>
             </div>
           )}
         </div>
