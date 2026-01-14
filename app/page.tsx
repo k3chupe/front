@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Result from '@/components/members/result';
 import AddModal from '@/components/members/addModal';
 import DeleteModal from '@/components/members/deleteModal';
+//import { getApiUrl } from '@/utils/api';
 
 function page() {
   const [members, setMembers] = useState<any[]>([]);
@@ -38,7 +39,16 @@ function page() {
   };
 
   useEffect(() => {
+<<<<<<< HEAD
     loadMembers(1);
+=======
+  fetch(getApiUrl("/api/lista-czlonkow/"))
+    .then(res => res.json())
+  .then(data => {
+    setMembers(data.results || []);
+  })
+    .catch(err => console.error("Błąd pobierania:", err));
+>>>>>>> a4f3d88 (Create NEXT_PUBLIC_API_URL environment variable and refactor API calls)
   }, []);
 
 
