@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image';
 import Result from '@/components/members/result';
 import AddModal from '@/components/members/addModal';
+import { getApiUrl } from '@/lib/api';
 
 function page() {
   const [members, setMembers] = useState<any[]>([]);
@@ -14,7 +15,7 @@ function page() {
 
 
   useEffect(() => {
-  fetch("http://localhost:8000/api/lista-czlonkow/")
+  fetch(getApiUrl("/api/lista-czlonkow/"))
     .then(res => res.json())
   .then(data => {
     setMembers(data.results || []);

@@ -4,6 +4,7 @@ import React from 'react'
 import { useState, useEffect } from 'react';
 import Select from '../select';
 import AddModal2 from './addModal2';
+import { getApiUrl } from '@/lib/api';
 
 type ModalProps = {
   onClose: () => void;
@@ -62,7 +63,7 @@ const addMember = async () => {
       projekt: selectedProjekt,
     };
 
-    const res = await fetch("http://localhost:8000/api/czlonkowie/", {
+    const res = await fetch(getApiUrl("/api/czlonkowie/"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -83,7 +84,7 @@ const addMember = async () => {
 
   const addKierunek = async (nazwa: string, opis: string) => {
   try {
-    const res = await fetch("http://localhost:8000/api/kierunki/", {
+    const res = await fetch(getApiUrl("/api/kierunki/"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -107,7 +108,7 @@ const addMember = async () => {
 
 const addSekcja = async (nazwa: string, opis: string) => {
   try {
-    const res = await fetch("http://localhost:8000/api/sekcje/", {
+    const res = await fetch(getApiUrl("/api/sekcje/"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -128,7 +129,7 @@ const addSekcja = async (nazwa: string, opis: string) => {
 
 const addProjekt = async (nazwa: string, opis: string) => {
   try {
-    const res = await fetch("http://localhost:8000/api/projekty/", {
+    const res = await fetch(getApiUrl("/api/projekty/"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -150,14 +151,14 @@ const addProjekt = async (nazwa: string, opis: string) => {
 
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/kierunki/")
+    fetch(getApiUrl("/api/kierunki/"))
       .then(res => res.json())
       .then(data => setKierunki(data.results))
       .catch((err) => console.error("Błąd pobierania kierunków:", err));
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/projekty/")
+    fetch(getApiUrl("/api/projekty/"))
       .then(res => res.json())
       .then(data => setProjekty(data.results))
       .catch(err => console.error(err));
@@ -165,7 +166,7 @@ const addProjekt = async (nazwa: string, opis: string) => {
 
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/sekcje/")
+    fetch(getApiUrl("/api/sekcje/"))
       .then(res => res.json())
       .then(data => setSekcje(data.results))
       .catch(err => console.error(err));
