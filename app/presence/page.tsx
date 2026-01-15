@@ -18,32 +18,33 @@ function page() {
   };
 
   return (
-    <div className='bg-white text-[#6D5BD0] h-screen flex flex-col rounded-lg border border-gray-300'>
+    <div className='bg-white text-[#6D5BD0] flex flex-col rounded-lg border border-gray-300'>
       <div className='w-100 p-4 flex w-full justify-between'>
       <SearchBar placeholder="Szukaj w bazie członków..." onSearch={handleSearch} />
         <div className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
           Dodaj Tabele
         </div>
       </div>  
-      <div className="px-4 p-2 border-y border-gray-300 bg-[#F4F2FF] 
-      grid grid-cols-[40px_15%_15%_15%_15%_15%_15%] items-center text-sm text-[#6E6893]">
-          <div className='pt-1'>
-            <input type="checkbox" />
-          </div>
-          <div className=''>Imie i nazwisko</div> 
-          <div className='flex items-center justify-center'>data</div> 
-          <div className='flex items-center justify-center'>wpisz date</div> 
-          <div className='flex items-center justify-center'>wpisz date</div> 
-          <div className='flex items-center justify-center'> wpisz date</div> 
-          <div className='flex items-center justify-center'>wpisz date</div> 
-          <div></div>
-      </div>  
+      <div className="overflow-x-auto">
+        <div className="min-w-max">
+          <div className={`px-4 py-2 gap-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_auto] items-center`}>
+            <div className=''>Imie i nazwisko</div> 
+              <div className='flex items-center justify-center'>data</div> 
+              <div className='flex items-center justify-center'>wpisz date</div> 
+              <div className='flex items-center justify-center'>wpisz date</div> 
+              <div className='flex items-center justify-center'> wpisz date</div> 
+              <div className='flex items-center justify-center'>wpisz date</div> 
+              <div></div>
+            </div>  
 
-      <div className="flex-1 flex flex-col overflow-auto">
-        <div className=' overflow-auto flex flex-col flex-1'>
-              <Result/>
-              <Result/>
+          <div className="flex-1 flex flex-col overflow-auto">
+            <div className=' overflow-auto flex flex-col flex-1'>
+                  <Result/>
+                  <Result/>
+            </div>
+          </div>
         </div>
+      </div>
 
 
         <div className="px-4 py-4 border-t border-gray-300 rounded-b-lg bg-[#F4F2FF] items-center text-sm text-[#6E6893] flex gap-15">
@@ -51,14 +52,13 @@ function page() {
             wierwsze na strone: 10
           </div>
           <div>
-            1-10 z 100
+            
           </div>
           <div className='flex items-center gap-8'>
-            <Image src="/left.png" alt="Search Icon" width={5} height={5} className='cursor-pointer transition duration-200 hover:brightness-60'/>
-            <Image src="/right.png" alt="Search Icon" width={5} height={5} className='cursor-pointer transition duration-200 hover:brightness-60'/>
+            <Image src="/left.png" alt="Search Icon" width={5} height={5}  className='cursor-pointer transition duration-200 hover:brightness-60'/>
+            <Image src="/right.png" alt="Search Icon" width={5} height={5}  className='cursor-pointer transition duration-200 hover:brightness-60'/>
           </div>
-        </div>
-      </div>  
+        </div> 
     </div>
   )
 }

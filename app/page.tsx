@@ -13,36 +13,34 @@ function page() {
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [nextPage, setNextPage] = useState<string | null>(null);
+  const [prevPage, setPrevPage] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<any>(null);
+  
 
 
 
-const loadMembers = async () => {
-  try {
-    const res = await fetch("http://localhost:8000/api/lista-czlonkow/");
-    const data = await res.json();
-    setMembers(data.results || []);
-  } catch (err) {
-    console.error("Błąd pobierania:", err);
-  }
-};
+  const loadMembers = async (pageNumber = 1) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/lista-czlonkow/?page=${pageNumber}`
+      );
+      const data = await res.json();
 
-useEffect(() => {
-  loadMembers();
-}, []);
+      setMembers(data.results || []);
+      setNextPage(data.next);
+      setPrevPage(data.previous);
+      setPage(pageNumber);
+    } catch (err) {
+      console.error("Błąd pobierania:", err);
+    }
+  };
 
+  useEffect(() => {
+    loadMembers(1);
+  }, []);
 
-  const filtered = members.filter(member =>
-    `${member.czlonek_imie} ${member.czlonek_nazwisko}`
-      .toLowerCase()
-      .includes(searchText.toLowerCase())
-  );
-
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const pageResults = filtered.slice(startIndex, endIndex);
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -50,16 +48,18 @@ useEffect(() => {
   };
 
   const handleNext = () => {
-    if(endIndex < filtered.length){
-      setPage(prev => prev + 1)
+    if (nextPage) {
+      loadMembers(page + 1);
     }
-  }
+  };
+
 
   const handlePrev = () => {
-    if(page > 1){
-      setPage(prev => prev - 1)
+    if (prevPage && page > 1) {
+      loadMembers(page - 1);
     }
-  }
+  };
+
 
   const handleEdit = async (member: any) => {
     try {
@@ -99,13 +99,14 @@ const handleDeleteConfirm = async () => {
 
 
   return (
-    <div className='bg-white text-[#6D5BD0]  flex flex-col rounded-lg border border-gray-300'>
+    <div className=' bg-white text-[#6D5BD0]  flex flex-col rounded-lg border border-gray-300'>
       <div className='w-100 p-4 flex w-full justify-between'>
       <SearchBar placeholder="Szukaj w bazie członków..." onSearch={handleSearch} />
       <div onClick={() =>{
         setMode("add");
         setSelectedMember(null);
         setIsOpen(true);
+        loadMembers(page);
         }} className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
         Dodaj członka
       </div>
@@ -124,7 +125,7 @@ const handleDeleteConfirm = async () => {
             <div className='flex justify-end min-w-[100px]'><Image src="/more.png" alt="more" width={6} height={20} /></div>
           </div>
 
-          {pageResults.map(member => (
+          {members.map(member => (
             <Result
               key={member.id}
               id={member.id}
@@ -161,7 +162,7 @@ const handleDeleteConfirm = async () => {
         <AddModal
               onClose={() => {
                 setIsOpen(false);
-                loadMembers();
+                loadMembers(page);
               }}
           mode={mode}
           member={selectedMember}
@@ -173,7 +174,7 @@ const handleDeleteConfirm = async () => {
           memberName={`${memberToDelete.imie} ${memberToDelete.nazwisko}`}
           onClose={() => {
             setDeleteModalOpen(false);
-            loadMembers();
+            loadMembers(page);
           }}
           onDelete={handleDeleteConfirm}
         />

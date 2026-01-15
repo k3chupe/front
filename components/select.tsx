@@ -31,7 +31,7 @@ export default function CustomSelect({
   return (
     <div className="relative w-full mt-2">
       <div
-        className="border border-gray-300 rounded p-2 cursor-pointer bg-white flex justify-between items-center"
+        className="border c rounded p-2 cursor-pointer bg-white flex justify-between items-center"
         onClick={() => setOpen(!open)}
       >
         <span>{selectedLabel || label}</span>

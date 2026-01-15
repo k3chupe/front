@@ -1,35 +1,48 @@
 import React from 'react'
 import Image from 'next/image';
 
-function result() {
+type Props = {
+  partner: {
+    id: number;
+    nazwa: string;
+    numer_telefonu: string | number;
+    e_mail: string;
+    status: string;
+    osoba_odpowiedzialna: string | number;
+    przychod: string | number;
+    odpowiedz: string | number;
+    opis: string;
+  };
+  onEdit: (partner: any) => void;
+  onDelete: (partner: any) => void;
+};
+
+function result({ partner, onEdit, onDelete }: Props) {
   return (
-                <div className="px-4 p-2 border-b border-gray-200 text-[#6E6893]
-              grid grid-cols-[40px_15%_10%_10%_10%_15%_15%_auto] items-center  ">
-                <div className='pt-1'>
-                  <input type="checkbox" />
-                </div>
-                <div className='text-[#25213B] text-md'>firma</div>
-                <div className='text-sm'>telefon</div>
-                <div className='text-sm'>e-mail</div>
-                <div className='bg-[#CDFFCD] mr-auto px-1 rounded-[100px] flex items-center gap-1 text-sm pr-2'>
-                  <div className="w-[6px] h-[6px] bg-[#007F00] rounded-full"></div>
-                  czekamy
-                </div>
-                <div>
-                  <div className='text-[#25213B] text-md'>Imie</div>
-                  <div>email</div>
-                </div>
-                <div>
-                  <div className='text-[#25213B] text-md'>$200</div>
-                  <div>USD</div>
-                </div>
-    
-                <div className='flex ml-auto items-center gap-4'>
-                  <Image src="/pen.png" alt="Search Icon" width={20} height={20} className='cursor-pointer transition duration-200 hover:brightness-60'/>
-                  <Image src="/trash.png" alt="Search Icon" width={20} height={20} className='cursor-pointer transition duration-200 hover:brightness-60'/>
-                </div>
-    
-                </div>
+    <div className="">
+      <div className=" border-b border-gray-200 p-2 px-4 grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] items-center gap-2 text-[#6E6893] min-w-[1000px]">
+        <div className='text-[#25213B] text-md'>{partner.nazwa}</div>
+        <div className='text-sm'>{partner.numer_telefonu}</div>
+        <div className='text-sm'>{partner.e_mail}</div>
+        <div className='bg-[#CDFFCD] mr-auto px-1 rounded-[100px] flex items-center gap-1 text-sm pr-2'>
+          <div className="w-[6px] h-[6px] bg-[#007F00] rounded-full"></div>
+          {partner.odpowiedz}
+        </div>
+        
+        <div className='text-sm'>{partner.osoba_odpowiedzialna}</div>
+        <div className='text-sm'>{partner.przychod}</div>
+
+        <div className='pl-4 flex ml-auto items-center justify-end gap-4 min-w-[100px]'        >
+          <Image src="/pen.png" alt="Search Icon" width={20} height={20} className='cursor-pointer transition duration-200 hover:brightness-60'
+            onClick={() => onEdit(partner)}
+          />
+          <Image src="/trash.png" alt="Search Icon" width={20} height={20} className='cursor-pointer transition duration-200 hover:brightness-60'
+            onClick={() => onDelete(partner)}
+          />
+        </div>
+
+        </div>
+  </div>
   )
 }
 
