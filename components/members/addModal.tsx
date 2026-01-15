@@ -37,8 +37,8 @@ function addModal({onClose}: ModalProps) {
 
   const [selectedImie, setSelectedImie] = useState("");
   const [selectedNazwisko, setSelectedNazwisko] = useState("");
-const [selectedIndeks, setSelectedIndeks] = useState<number | "">("");
-const [selectedTelefon, setSelectedTelefon] = useState<number | "">("");
+  const [selectedIndeks, setSelectedIndeks] = useState<number | "">("");
+  const [selectedTelefon, setSelectedTelefon] = useState<number | "">("");
 
 
   const [selectedMail, setSelectedMail] = useState("");
@@ -49,8 +49,15 @@ const [selectedTelefon, setSelectedTelefon] = useState<number | "">("");
   const [projekty, setProjekty] = useState<Projekt[]>([]);
   const [sekcje, setSekcje] = useState<Sekcje[]>([]);
   
+  const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+
 const addMember = async () => {
   try {
+    setErrors({});
+    setIsLoading(true);
+
     const payload = {
       imie: selectedImie,
       nazwisko: selectedNazwisko,
@@ -68,15 +75,19 @@ const addMember = async () => {
       body: JSON.stringify(payload),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      const err = await res.json();
-      console.error(err);
+      setErrors(data);
       return;
     }
 
     onClose();
   } catch (err) {
     console.error(err);
+    setErrors({ general: ["Wystąpił błąd sieciowy"] });
+  } finally {
+    setIsLoading(false);
   }
 };
 
@@ -183,6 +194,7 @@ const addProjekt = async (nazwa: string, opis: string) => {
             value={selectedImie}
             onChange={(e) => setSelectedImie(e.target.value)}
           />
+          {errors.imie && <p className="text-red-500 text-sm mt-1">{errors.imie.join(" ")}</p>}
           <input 
             type="text" 
             placeholder="Nazwisko" 
@@ -190,6 +202,8 @@ const addProjekt = async (nazwa: string, opis: string) => {
             value={selectedNazwisko}
             onChange={(e) => setSelectedNazwisko(e.target.value)}
           />
+          {errors.nazwisko && <p className="text-red-500 text-sm mt-1">{errors.nazwisko.join(" ")}</p>}
+
         </div>
           <input 
             type="text" 
@@ -198,40 +212,47 @@ const addProjekt = async (nazwa: string, opis: string) => {
             value={selectedMail}
             onChange={(e) => setSelectedMail(e.target.value)}
           />
+          {errors.e_mail && <p className="text-red-500 text-sm mt-1">{errors.e_mail.join(" ")}</p>}
 
-        <input 
-           type="number" 
-          placeholder="Indeks" 
-          className="border border-gray-300 rounded p-2 mt-2 w-full"
-          value={selectedIndeks}
-          onChange={(e) =>
-            setSelectedIndeks(
-              e.target.value === "" ? "" : Number(e.target.value)
-            )
-          }
-        />
 
-        <input 
-          type="tel"
-          placeholder="Numer telefonu" 
-          className="border border-gray-300 rounded p-2 mt-2 w-full"
-          value={selectedTelefon}
-          onChange={(e) =>
-            setSelectedTelefon(
-              e.target.value === "" ? "" : Number(e.target.value)
-            )
-          }      
-        />
-        <Select
-          label="Wybierz sekcję"
-          options={sekcje.map(s => ({
-            label: s.nazwa,
-            value: s.id
-          }))}
-          value={selectedSekcja}
-          onChange={setSelectedSekcja}
-          onAddNew={() => setIsSekcjaModalOpen(true)}
-        />
+          <input 
+            type="number" 
+            placeholder="Indeks" 
+            className="border border-gray-300 rounded p-2 mt-2 w-full"
+            value={selectedIndeks}
+            onChange={(e) =>
+              setSelectedIndeks(
+                e.target.value === "" ? "" : Number(e.target.value)
+              )
+            }
+          />
+          {errors.indeks && <p className="text-red-500 text-sm mt-1">{errors.indeks.join(" ")}</p>}
+
+
+          <input 
+            type="tel"
+            placeholder="Numer telefonu" 
+            className="border border-gray-300 rounded p-2 mt-2 w-full"
+            value={selectedTelefon}
+            onChange={(e) =>
+              setSelectedTelefon(
+                e.target.value === "" ? "" : Number(e.target.value)
+              )
+            }      
+          />
+          {errors.telefon && <p className="text-red-500 text-sm mt-1">{errors.telefon.join(" ")}</p>}
+
+          <Select
+            label="Wybierz sekcję"
+            options={sekcje.map(s => ({
+              label: s.nazwa,
+              value: s.id
+            }))}
+            value={selectedSekcja}
+            onChange={setSelectedSekcja}
+            onAddNew={() => setIsSekcjaModalOpen(true)}
+          />
+          {errors.sekcja && <p className="text-red-500 text-sm mt-1">{errors.sekcja.join(" ")}</p>}
 
           <Select
             label="Wybierz projekt"
@@ -243,6 +264,7 @@ const addProjekt = async (nazwa: string, opis: string) => {
             onChange={setSelectedProjekt}
             onAddNew={() => setIsProjektModalOpen(true)}
           />
+          {errors.projekt && <p className="text-red-500 text-sm mt-1">{errors.projekt.join(" ")}</p>}
 
           <Select
             label="Wybierz kierunek"
@@ -254,14 +276,23 @@ const addProjekt = async (nazwa: string, opis: string) => {
             onChange={setSelectedKierunek}
             onAddNew={() => setIsKierunekModalOpen(true)}
           />
+          {errors.kierunek && <p className="text-red-500 text-sm mt-1">{errors.kierunek.join(" ")}</p>}
+
 
         <div className='flex w-full justify-between mt-2'>
           <div onClick={() =>{
-            onClose();
             addMember();
           }} 
-            className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
-              dodaj
+            className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'
+          >
+            {isLoading ? (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+            ) : (
+              "dodaj"
+            )}
           </div>
           <div onClick={() =>onClose()} className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
               wróć

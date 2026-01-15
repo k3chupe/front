@@ -50,54 +50,46 @@ function page() {
   }
 
   return (
-    <div className='bg-white text-[#6D5BD0] h-screen flex flex-col rounded-lg border border-gray-300'>
+    <div className='bg-white text-[#6D5BD0]  flex flex-col rounded-lg border border-gray-300'>
       <div className='w-100 p-4 flex w-full justify-between'>
       <SearchBar placeholder="Szukaj w bazie członków..." onSearch={handleSearch} />
       <div onClick={() =>setIsOpen(true)} className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
         Dodaj członka
       </div>
       </div>  
-      <div className="px-4 p-2 border-y border-gray-300 bg-[#F4F2FF] 
-      grid grid-cols-[40px_15%_10%_10%_10%_15%_15%_15%_auto] items-center text-sm text-[#6E6893]">
-          <div className='pt-1'>
-            <input type="checkbox" />
+{/* Scrollowany kontener */}
+      <div className="overflow-x-auto">
+        <div className="min-w-max">
+          {/* Nagłówek */}
+          <div className={`px-4 py-2 gap-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] items-center`}>
+            <div>Imię i nazwisko</div>
+            <div>Indeks</div>
+            <div>Telefon</div>
+            <div>Sekcje</div>
+            <div>Projekty</div>
+            <div>Kierunek</div>
+            <div>Zaktualizowano</div>
+            <div className='flex justify-end min-w-[100px]'><Image src="/more.png" alt="more" width={6} height={20} /></div>
           </div>
-          <div className=''>Imie i nazwisko</div> 
-          <div className=''>indeks</div> 
-          <div>Telefon</div> 
-          <div>Sekcje</div> 
-          <div>Projekty</div> 
-          <div>Kierunek</div> 
-          <div></div>
-          <div className='flex ml-auto items-center'>
-            <Image src="/more.png" alt="Search Icon" width={6} height={20} className='cursor-pointer transition duration-200 hover:brightness-60'/>
-          </div>
-      </div>  
 
-        <div className="flex-1 flex flex-col overflow-auto">
-            {pageResults.map((member, index) => (
-            // <div key={index} className="grid grid-cols-[40px_15%_10%_10%_10%_15%_15%_15%_auto] p-2 border-b border-gray-200">
-            //   <input type="checkbox" />
-            //   <div>{member.czlonek_imie} {member.czlonek_nazwisko}</div>
-            //   <div>{member.indeks}</div>
-            //   <div>{member.telefon || "-"}</div>
-            //   <div>{member.sekcja_nazwa || "-"}</div>
-            //   <div>{member.projekt_nazwa || "-"}</div>
-            //   <div>{member.kierunek_nazwa || "-"}</div>
-            //   <div>...</div>
-              <Result 
+          {/* Wyniki */}
+          {pageResults.map((member, index) => (
+            <Result 
               key={index} 
               indeks={member.indeks} 
               imie={member.czlonek_imie} 
               nazwisko={member.czlonek_nazwisko} 
-              email={member.email} telefon={member.telefon} 
+              email={member.email} 
+              telefon={member.telefon} 
               sekcje={member.sekcja_nazwa} 
               projekty={member.projekt_nazwa} 
               kierunek={member.kierunek_nazwa}
-              />
-            // </div>
-            ))}
+            />
+          ))}
         </div>
+      </div>
+
+
         <div className="px-4 py-4 border-t border-gray-300 rounded-b-lg bg-[#F4F2FF] items-center text-sm text-[#6E6893] flex gap-15">
           <div className='flex ml-auto items-center '>
             wierwsze na strone: 10
