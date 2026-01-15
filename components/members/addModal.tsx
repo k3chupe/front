@@ -7,6 +7,8 @@ import AddModal2 from './addModal2';
 
 type ModalProps = {
   onClose: () => void;
+  mode: "add" | "edit";
+  member?: any;
 };
 
 type Kierunek = {
@@ -30,7 +32,7 @@ type Sekcje = {
 
 
 
-function addModal({onClose}: ModalProps) {
+function addModal({onClose, mode, member }: ModalProps) {
   const [isKierunekModalOpen, setIsKierunekModalOpen] = useState(false);
   const [isSekcjaModalOpen, setIsSekcjaModalOpen] = useState(false);
   const [isProjektModalOpen, setIsProjektModalOpen] = useState(false);
@@ -137,26 +139,71 @@ const addSekcja = async (nazwa: string, opis: string) => {
   }
 };
 
-const addProjekt = async (nazwa: string, opis: string) => {
-  try {
-    const res = await fetch("http://localhost:8000/api/projekty/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ nazwa, opis }),
-    });
+  const addProjekt = async (nazwa: string, opis: string) => {
+    try {
+      const res = await fetch("http://localhost:8000/api/projekty/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nazwa, opis }),
+      });
 
-    if (!res.ok) throw new Error("Błąd dodawania kierunku");
+      if (!res.ok) throw new Error("Błąd dodawania kierunku");
+
+      const data = await res.json();
+      
+      setProjekty(prev => [...prev, data]);
+      setIsProjektModalOpen(false); 
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+  const editMember = async () => {
+  if (!member?.id) return;
+
+  try {
+    setErrors({});
+    setIsLoading(true);
+
+    const payload = {
+      imie: selectedImie,
+      nazwisko: selectedNazwisko,
+      e_mail: selectedMail,
+      indeks: selectedIndeks || null,
+      telefon: selectedTelefon || null,
+      kierunek: selectedKierunek,
+      sekcja: selectedSekcja,
+      projekt: selectedProjekt,
+    };
+
+    const res = await fetch(
+      `http://localhost:8000/api/czlonkowie/${member.id}/`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const data = await res.json();
-    
-    setProjekty(prev => [...prev, data]);
-    setIsProjektModalOpen(false); 
+
+    if (!res.ok) {
+      setErrors(data);
+      return;
+    }
+
+    onClose();
   } catch (err) {
     console.error(err);
+    setErrors({ general: ["Wystąpił błąd sieciowy"] });
+  } finally {
+    setIsLoading(false);
   }
 };
+
 
 
 
@@ -182,10 +229,25 @@ const addProjekt = async (nazwa: string, opis: string) => {
       .catch(err => console.error(err));
   }, []);
 
+  useEffect(() => {
+    if (mode === "edit" && member) {
+      setSelectedImie(member.imie ?? "");
+      setSelectedNazwisko(member.nazwisko ?? "");
+      setSelectedMail(member.e_mail ?? "");
+      setSelectedIndeks(member.indeks ?? "");
+      setSelectedTelefon(member.telefon ?? "");
+      setSelectedKierunek(member.kierunek ?? null); 
+      setSelectedSekcja(member.sekcja ?? null); 
+      setSelectedProjekt(member.projekt ?? null); 
+    }
+  }, [mode, member]);
+
   return (
     <div onClick={() => onClose()} className='fixed bg-black/50 inset-0 flex justify-center items-center'>
       <div className='bg-white flex flex-col p-6 rounded-lg' onClick={(e) => e.stopPropagation()}>
-        <h2 className='text-xl mb-4 text-[#6D5BD0]'>Dodaj nowego członka</h2>
+        <h2 className='text-xl mb-4 text-[#6D5BD0]'>
+          {mode === "add" ? "Dodaj nowego członka" : "Edytuj członka"}
+        </h2>
         <div className="flex gap-2">
           <input 
             type="text" 
@@ -281,7 +343,7 @@ const addProjekt = async (nazwa: string, opis: string) => {
 
         <div className='flex w-full justify-between mt-2'>
           <div onClick={() =>{
-            addMember();
+             mode === "add" ? addMember() : editMember();
           }} 
             className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'
           >
@@ -291,7 +353,7 @@ const addProjekt = async (nazwa: string, opis: string) => {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
               </svg>
             ) : (
-              "dodaj"
+              mode === "add" ? "Dodaj" : "Zapisz zmiany"
             )}
           </div>
           <div onClick={() =>onClose()} className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
