@@ -1,30 +1,19 @@
 "use client";
 import SearchBar from '@/components/searchbar'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image';
 import Result from '@/components/presence/result';
+import AddModal from '@/components/presence/addModal';
 
-const spotkania = [
-  {
-    id: 1,
-    nazwa: "spot",
-    data: "16.04.2004",
-  },
-  {
-    id: 2,
-    nazwa: "spot2",
-    data:"16.04.2004",
-  },
-  {
-    id: 3,
-    nazwa: "spot2",
-    data:"16.04.2004",
-  }
-]
+
 
 function page() {
     const data = ["Jan", "Anna", "Piotr", "Kasia"];
     const [searchText, setSearchText] = useState("");
+    const [members, setMembers] = useState <any[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const [spotkania, setSpotkania] = useState<any[]>([]);
+
 
     const filtered = data.filter(name =>
       name.toLowerCase().includes(searchText.toLowerCase())
@@ -35,25 +24,62 @@ function page() {
     console.log("Wpisany tekst:", value);
   };
 
+
+    const loadMembers = async (pageNumber = 1) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/lista-czlonkow/?page=${pageNumber}`
+      );
+      const data = await res.json();
+
+      setMembers(data.results || []);
+    } catch (err) {
+      console.error("Błąd pobierania:", err);
+    }
+  };
+
+  const loadSpotkania = async () => {
+  try {
+    const res = await fetch("http://localhost:8000/api/spotkania/");
+    const data = await res.json();
+
+    // jeśli masz paginację DRF
+    setSpotkania(data.results ?? data);
+  } catch (err) {
+    console.error("Błąd pobierania spotkań:", err);
+  }
+};
+
+
+    useEffect(() => {
+  loadMembers(1);
+  loadSpotkania();
+}, []);
+
   return (
     <div className='bg-white text-[#6D5BD0] flex flex-col rounded-lg border border-gray-300'>
       <div className='w-100 p-4 flex w-full justify-between'>
-      <SearchBar placeholder="Szukaj w bazie członków..." onSearch={handleSearch} />
-        <div className='bg-[#6D5BD0] hover:bg-[#F4F2FF] rounded-md px-4 py-2 text-white border border-[#6D5BD0] hover:text-[#6D5BD0] cursor-pointer'>
-          Dodaj Tabele
-        </div>
+        <SearchBar placeholder="Szukaj w bazie członków..." onSearch={handleSearch} />
+
       </div>  
       <div className="overflow-x-auto">
         <div className="min-w-max">
-          <div className={`flex px-4 py-2 gap-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] items-center`}>
-            <div className='w-40'>Imie i nazwisko</div> 
+          <div className={`flex px-4 py-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] items-center`}>
+            <div className='w-60'>Imie i nazwisko</div> 
               { spotkania.map(item => (
-                <div key={item.id} className='w-flex items-center justify-center'>wpisz date</div> 
+                <div key={item.id} className='flex w-30 items-center justify-center'>{new Date(item.data).toLocaleDateString("pl-PL")}</div> 
               ))}
+              <div className='flex w-30 items-center justify-center'>
+                <Image src="/add.png" alt="Search Icon" width={20} height={20}  className='cursor-pointer transition duration-200 hover:brightness-60'
+                onClick={() => setIsOpen(true)}/>
+              </div> 
             </div>  
           <div className="flex-1 flex flex-col overflow-auto">
             <div className=' overflow-auto flex flex-col flex-1'>
-                  <Result spotkania={spotkania}/>
+              { members.map(item => (
+                <Result key={item.id} spotkania={spotkania} czlonek_imie={item.czlonek_imie} czlonek_email={item.czlonek_email}/>
+              ))}
+              
             </div>
           </div>
         </div>
@@ -70,6 +96,14 @@ function page() {
             <Image src="/right.png" alt="Search Icon" width={5} height={5}  className='cursor-pointer transition duration-200 hover:brightness-60'/>
           </div>
         </div> 
+        {isOpen && (
+        <AddModal
+              onClose={() => {
+                setIsOpen(false);
+                // loadMembers(page);
+              }}
+        />
+      )}
     </div>
   )
 }
