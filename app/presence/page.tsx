@@ -4,6 +4,24 @@ import React, { useState } from 'react'
 import Image from 'next/image';
 import Result from '@/components/presence/result';
 
+const spotkania = [
+  {
+    id: 1,
+    nazwa: "spot",
+    data: "16.04.2004",
+  },
+  {
+    id: 2,
+    nazwa: "spot2",
+    data:"16.04.2004",
+  },
+  {
+    id: 3,
+    nazwa: "spot2",
+    data:"16.04.2004",
+  }
+]
+
 function page() {
     const data = ["Jan", "Anna", "Piotr", "Kasia"];
     const [searchText, setSearchText] = useState("");
@@ -27,26 +45,19 @@ function page() {
       </div>  
       <div className="overflow-x-auto">
         <div className="min-w-max">
-          <div className={`px-4 py-2 gap-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_auto] items-center`}>
-            <div className=''>Imie i nazwisko</div> 
-              <div className='flex items-center justify-center'>data</div> 
-              <div className='flex items-center justify-center'>wpisz date</div> 
-              <div className='flex items-center justify-center'>wpisz date</div> 
-              <div className='flex items-center justify-center'> wpisz date</div> 
-              <div className='flex items-center justify-center'>wpisz date</div> 
-              <div></div>
+          <div className={`flex px-4 py-2 gap-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] items-center`}>
+            <div className='w-40'>Imie i nazwisko</div> 
+              { spotkania.map(item => (
+                <div key={item.id} className='w-flex items-center justify-center'>wpisz date</div> 
+              ))}
             </div>  
-
           <div className="flex-1 flex flex-col overflow-auto">
             <div className=' overflow-auto flex flex-col flex-1'>
-                  <Result/>
-                  <Result/>
+                  <Result spotkania={spotkania}/>
             </div>
           </div>
         </div>
       </div>
-
-
         <div className="px-4 py-4 border-t border-gray-300 rounded-b-lg bg-[#F4F2FF] items-center text-sm text-[#6E6893] flex gap-15">
           <div className='flex ml-auto items-center '>
             wierwsze na strone: 10

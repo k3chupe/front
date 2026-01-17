@@ -21,7 +21,7 @@ function page() {
     const loadPartners = async (pageNumber = 1) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/partnerzy/?page=${pageNumber}&search=${searchText}`
+        `http://localhost:8000/api/partnerzy/?page=${pageNumber}`
       );
       const data = await res.json();
 
@@ -36,10 +36,11 @@ function page() {
 
     useEffect(() => {
     loadPartners(1);
-  }, [searchText]);
+  }, []);
 
-    const handleSearch = (value: string) => {
+  const handleSearch = (value: string) => {
     setSearchText(value);
+    console.log("Wpisany tekst:", value);
   };
 
   const handleNext = () => nextPage && loadPartners(page + 1);
@@ -70,6 +71,10 @@ function page() {
     setPartners(prev => prev.filter(p => p.id !== partnerToDelete.id));
     setDeleteModalOpen(false);
   };
+
+  const filteredPartners = partners.filter(partner =>
+  `${partner.nazwa} ${partner.nazwa}`.toLowerCase().includes(searchText.toLowerCase())
+);
 
   return (
     <div className='bg-white text-[#6D5BD0] flex flex-col rounded-lg border border-gray-300'>
@@ -103,7 +108,7 @@ function page() {
 
         <div className="flex-1 flex flex-col overflow-auto">
           <div className="flex flex-col flex-1 overflow-auto ">
-            {partners.map(partner => (
+            {filteredPartners.map(partner => (
               <Result
                 key={partner.id}
                 partner={partner}
@@ -120,7 +125,7 @@ function page() {
             wierwsze na strone: 10
           </div>
           <div>
-            {1+(page-1)*10}-{partners.length+(page-1)*10}
+            {1+(page-1)*10}-{filteredPartners.length+(page-1)*10}
           </div>
           <div className='flex items-center gap-8'>
             <Image src="/left.png" alt="Search Icon" width={5} height={5} onClick={handlePrev} className='cursor-pointer transition duration-200 hover:brightness-60'/>
@@ -142,7 +147,7 @@ function page() {
 
       {deleteModalOpen && partnerToDelete && (
         <DeleteModal
-          partnerName={partnerToDelete.firma}
+          partnerName={partnerToDelete.nazwa}
           onDelete={handleDeleteConfirm}
           onClose={() => setDeleteModalOpen(false)}
         />

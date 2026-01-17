@@ -97,6 +97,10 @@ const handleDeleteConfirm = async () => {
 };
 
 
+const filteredMembers = members.filter(member =>
+  `${member.czlonek_imie} ${member.czlonek_nazwisko}`.toLowerCase().includes(searchText.toLowerCase())
+);
+
 
   return (
     <div className=' bg-white text-[#6D5BD0]  flex flex-col rounded-lg border border-gray-300'>
@@ -125,7 +129,7 @@ const handleDeleteConfirm = async () => {
             <div className='flex justify-end min-w-[100px]'><Image src="/more.png" alt="more" width={6} height={20} /></div>
           </div>
 
-          {members.map(member => (
+          {filteredMembers.map(member => (
             <Result
               key={member.id}
               id={member.id}
