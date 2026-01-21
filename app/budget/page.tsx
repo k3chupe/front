@@ -111,6 +111,22 @@ const handlePrevPrzy = () => {
   }
 };
 
+const filteredPrzychody = przychody.filter(item =>
+  (item.nazwa ?? "").toString().toLowerCase().includes(searchText.toLowerCase()) ||
+  (item.kwota ?? "").toString().includes(searchText) ||
+  (item.osoba_odpowiedzialna ?? "").toString().toLowerCase().includes(searchText.toLowerCase()) ||
+  (item.data_dodania ? new Date(item.data_dodania).toLocaleDateString("pl-PL") : "").includes(searchText)
+);
+
+const filteredWydatki = wydatki.filter(item =>
+  (item.nazwa ?? "").toString().toLowerCase().includes(searchText.toLowerCase()) ||
+  (item.kwota ?? "").toString().includes(searchText) ||
+  (item.osoba_odpowiedzialna ?? "").toString().toLowerCase().includes(searchText.toLowerCase()) ||
+  (item.data_dodania ? new Date(item.data_dodania).toLocaleDateString("pl-PL") : "").includes(searchText)
+);
+
+
+
 
 
 
@@ -145,7 +161,7 @@ const handlePrevPrzy = () => {
                 <div>Data dodania</div>
               </div>
 
-              {przychody.map(item => (
+              {filteredPrzychody.map(item => (
                 <Result
                   key={item.id}
                   item={item}
@@ -159,7 +175,8 @@ const handlePrevPrzy = () => {
           </div>
                 <div className="px-4 py-4 border-t border-gray-300 bg-[#F4F2FF] flex items-center text-sm text-[#6E6893]">
         <div className="ml-auto">Wiersze na stronę: 10</div>
-        <div className="mx-6">{1+(pagePrzy-1)*10}-{przychody.length+(pageWyd-1)*10}</div>
+        <div className="mx-6">
+          {1+(pagePrzy-1)*10}-{przychody.length+(pagePrzy-1)*10}</div>
         <div className="flex gap-6">
           <Image
             src="/left.png"
@@ -180,7 +197,6 @@ const handlePrevPrzy = () => {
         </div>
       </div>
         </div>
-
         <div className="w-1/2 border-l border-gray-300 flex flex-col">
           <div className="py-4 text-center font-medium bg-[#F4F2FF] border-b border-gray-300">
             Wydatki
@@ -195,7 +211,7 @@ const handlePrevPrzy = () => {
                 <div>Data dodania</div>
               </div>
 
-              {wydatki.map(item => (
+              {filteredWydatki.map(item => (
                 <Result
                   key={item.id}
                   item={item}

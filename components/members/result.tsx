@@ -18,7 +18,7 @@ interface ResultProps {
 function result({id, indeks, imie, nazwisko, email, telefon, sekcje, projekty, kierunek, onEdit,onDelete}: ResultProps) {
   return (
     <div className="border-b border-gray-200">
-      <div className="p-2 px-4 grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] items-center gap-2 text-[#6E6893] min-w-[1000px]">
+      <div className="p-2 px-4 grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_auto] items-center gap-2 text-[#6E6893] min-w-[1000px]">
         <div>
           <div className='text-[#25213B] text-md'>{imie} {nazwisko}</div>
           <div>{email}</div>
@@ -36,10 +36,6 @@ function result({id, indeks, imie, nazwisko, email, telefon, sekcje, projekty, k
         <div className='bg-[#FFD9D6] mr-auto px-1 rounded-lg flex items-center gap-1 text-sm pr-2'>
           <div className="w-[6px] h-[6px] bg-[#FF6053] rounded-full"></div>
           {kierunek}
-        </div>
-        <div>
-          <div>Zaktualizowano:</div> 
-          <div>data</div> 
         </div>
 
         <div className='pl-4 flex ml-auto items-center justify-end gap-4 min-w-[100px]'        >

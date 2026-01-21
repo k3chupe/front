@@ -98,7 +98,15 @@ const handleDeleteConfirm = async () => {
 
 
 const filteredMembers = members.filter(member =>
-  `${member.czlonek_imie} ${member.czlonek_nazwisko}`.toLowerCase().includes(searchText.toLowerCase())
+  (
+    `${member.czlonek_imie ?? ""} ${member.czlonek_nazwisko ?? ""}` +
+    ` ${member.indeks ?? ""}` +
+    ` ${member.email ?? ""}` +
+    ` ${member.telefon ?? ""}` +
+    ` ${member.sekcja_nazwa ?? ""}` +
+    ` ${member.projekt_nazwa ?? ""}` +
+    ` ${member.kierunek_nazwa ?? ""}`
+  ).toLowerCase().includes(searchText.toLowerCase())
 );
 
 
@@ -118,14 +126,13 @@ const filteredMembers = members.filter(member =>
       <div className="overflow-x-auto">
         <div className="min-w-max">
 
-          <div className={`px-4 py-2 gap-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] items-center`}>
+          <div className={`px-4 py-2 gap-2 border-b border-gray-300 bg-[#F4F2FF] text-sm text-[#6E6893] grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_auto] items-center`}>
             <div>Imię i nazwisko</div>
             <div>Indeks</div>
             <div>Telefon</div>
             <div>Sekcje</div>
             <div>Projekty</div>
             <div>Kierunek</div>
-            <div>Zaktualizowano</div>
             <div className='flex justify-end min-w-[100px]'><Image src="/more.png" alt="more" width={6} height={20} /></div>
           </div>
 

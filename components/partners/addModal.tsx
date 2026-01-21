@@ -6,6 +6,18 @@ type ModalProps = {
   mode: "add" | "edit";
   partner?: any;
 };
+type Czlonek = {
+  id: number;
+  imie: string;
+  nazwisko: string;
+  e_mail: string;
+};
+type Status = {
+  id: number;
+  nazwa: string;
+  opis: string;
+};
+
 
 function AddPartnerModal({ onClose, mode, partner }: ModalProps) {
   const [nazwa, setNazwa] = useState("");
@@ -15,6 +27,12 @@ function AddPartnerModal({ onClose, mode, partner }: ModalProps) {
   const [przychod, setPrzychod] = useState<number | "">("");
   const [odpowiedz, setOdpowiedz] = useState<number | "">("");
   const [opis, setOpis] = useState("");
+  const [czlonkowie, setCzlonkowie] = useState<Czlonek[]>([]);
+  const [showCzlonkowie, setShowCzlonkowie] = useState(false);
+  const [isLoadingCzlonkowie, setIsLoadingCzlonkowie] = useState(false);
+  const [statusy, setStatusy] = useState<Status[]>([]);
+  const [showStatusy, setShowStatusy] = useState(false);
+  const [isLoadingStatusy, setIsLoadingStatusy] = useState(false);
 
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +47,30 @@ function AddPartnerModal({ onClose, mode, partner }: ModalProps) {
     odpowiedz: odpowiedz === "" ? null : odpowiedz,
     opis,
   };
+
+  const fetchCzlonkowie = async () => {
+    try {
+      setIsLoadingCzlonkowie(true);
+      const res = await fetch("http://localhost:8000/api/czlonkowie/");
+      const data = await res.json();
+      setCzlonkowie(data.results);
+    } finally {
+      setIsLoadingCzlonkowie(false);
+    }
+  };
+
+  const fetchStatusy = async () => {
+    try {
+      setIsLoadingStatusy(true);
+      const res = await fetch("http://localhost:8000/api/slownik-statusow/");
+      const data = await res.json();
+      setStatusy(data.results);
+    } finally {
+      setIsLoadingStatusy(false);
+    }
+  };
+
+
 
   const addPartner = async () => {
     try {
@@ -128,17 +170,49 @@ function AddPartnerModal({ onClose, mode, partner }: ModalProps) {
           <p className="text-red-500 text-sm">{errors.e_mail.join(" ")}</p>
         )}
 
-        <input
-          type="number"
-          placeholder="Osoba odpowiedzialna (ID)"
-          className="border border-gray-300 rounded p-2 mt-2 w-full"
-          value={osobaOdpowiedzialna}
-          onChange={(e) =>
-            setOsobaOdpowiedzialna(
-              e.target.value === "" ? "" : Number(e.target.value)
-            )
-          }
-        />
+        <div className="relative mt-2">
+          <input
+            type="text"
+            readOnly
+            placeholder="Osoba odpowiedzialna"
+            className="border border-gray-300 rounded p-2 w-full cursor-pointer"
+            value={
+              osobaOdpowiedzialna
+                ? czlonkowie.find(c => c.id === osobaOdpowiedzialna)
+                    ?.imie + " " +
+                  czlonkowie.find(c => c.id === osobaOdpowiedzialna)
+                    ?.nazwisko
+                : ""
+            }
+            onClick={() => {
+              setShowCzlonkowie(!showCzlonkowie);
+              if (czlonkowie.length === 0) fetchCzlonkowie();
+            }}
+          />
+
+          {showCzlonkowie && (
+            <div className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full max-h-48 overflow-y-auto shadow-lg">
+              {czlonkowie.map(c => (
+                <div
+                  key={c.id}
+                  className="p-2 hover:bg-[#F4F2FF] cursor-pointer"
+                  onClick={() => {
+                    setOsobaOdpowiedzialna(c.id);
+                    setShowCzlonkowie(false);
+                  }}
+                >
+                  <div className="font-medium">
+                    {c.imie} {c.nazwisko}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {c.e_mail}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {errors.osoba_odpowiedzialna && (
           <p className="text-red-500 text-sm">
             {errors.osoba_odpowiedzialna.join(" ")}
@@ -158,15 +232,47 @@ function AddPartnerModal({ onClose, mode, partner }: ModalProps) {
           <p className="text-red-500 text-sm">{errors.przychod.join(" ")}</p>
         )}
 
-        <input
-          type="number"
-          placeholder="Odpowiedź (ID)"
-          className="border border-gray-300 rounded p-2 mt-2 w-full"
-          value={odpowiedz}
-          onChange={(e) =>
-            setOdpowiedz(e.target.value === "" ? "" : Number(e.target.value))
-          }
-        />
+        <div className="relative mt-2">
+          <input
+            type="text"
+            readOnly
+            placeholder="Status odpowiedzi"
+            className="border border-gray-300 rounded p-2 w-full cursor-pointer"
+            value={
+              odpowiedz
+                ? statusy.find(s => s.id === odpowiedz)?.nazwa ?? ""
+                : ""
+            }
+            onClick={() => {
+              setShowStatusy(!showStatusy);
+              if (statusy.length === 0) fetchStatusy();
+            }}
+          />
+
+          {showStatusy && (
+            <div className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full max-h-40 overflow-y-auto shadow-lg">
+              {isLoadingStatusy && (
+                <div className="p-2 text-sm text-gray-500">Ładowanie...</div>
+              )}
+
+              {!isLoadingStatusy &&
+                statusy.map(s => (
+                  <div
+                    key={s.id}
+                    className="p-2 hover:bg-[#F4F2FF] cursor-pointer"
+                    onClick={() => {
+                      setOdpowiedz(s.id);
+                      setShowStatusy(false);
+                    }}
+                  >
+                    <div className="font-medium">{s.nazwa}</div>
+                    <div className="text-xs text-gray-500">{s.opis}</div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+
         {errors.odpowiedz && (
           <p className="text-red-500 text-sm">{errors.odpowiedz.join(" ")}</p>
         )}

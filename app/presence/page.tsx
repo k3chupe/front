@@ -8,16 +8,19 @@ import AddModal from '@/components/presence/addModal';
 
 
 function page() {
-    const data = ["Jan", "Anna", "Piotr", "Kasia"];
-    const [searchText, setSearchText] = useState("");
-    const [members, setMembers] = useState <any[]>([]);
-    const [isOpen, setIsOpen] = useState(false);
-    const [spotkania, setSpotkania] = useState<any[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [members, setMembers] = useState <any[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [spotkania, setSpotkania] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [nextPage, setNextPage] = useState<string | null>(null);
+  const [prevPage, setPrevPage] = useState<string | null>(null);
 
 
-    const filtered = data.filter(name =>
-      name.toLowerCase().includes(searchText.toLowerCase())
-    );
+  const filteredMembers = members.filter(member =>
+    member.czlonek_imie.toLowerCase().includes(searchText.toLowerCase()) ||
+    member.czlonek_email.toLowerCase().includes(searchText.toLowerCase())
+  );
 
     const handleSearch = (value: string) => {
     setSearchText(value);
@@ -25,7 +28,7 @@ function page() {
   };
 
 
-    const loadMembers = async (pageNumber = 1) => {
+  const loadMembers = async (pageNumber = 1) => {
     try {
       const res = await fetch(
         `http://localhost:8000/api/lista-czlonkow/?page=${pageNumber}`
@@ -33,28 +36,42 @@ function page() {
       const data = await res.json();
 
       setMembers(data.results || []);
+      setNextPage(data.next);
+      setPrevPage(data.previous);
+      setPage(pageNumber);
     } catch (err) {
       console.error("Błąd pobierania:", err);
     }
   };
 
   const loadSpotkania = async () => {
-  try {
-    const res = await fetch("http://localhost:8000/api/spotkania/");
-    const data = await res.json();
+    try {
+      const res = await fetch("http://localhost:8000/api/spotkania/");
+      const data = await res.json();
 
-    // jeśli masz paginację DRF
-    setSpotkania(data.results ?? data);
-  } catch (err) {
-    console.error("Błąd pobierania spotkań:", err);
-  }
-};
+      // jeśli masz paginację DRF
+      setSpotkania(data.results ?? data);
+    } catch (err) {
+      console.error("Błąd pobierania spotkań:", err);
+    }
+  };
 
+  useEffect(() => {
+    loadMembers(1);
+    loadSpotkania();
+  }, []);
 
-    useEffect(() => {
-  loadMembers(1);
-  loadSpotkania();
-}, []);
+    const handleNext = () => {
+    if (nextPage) {
+      loadMembers(page + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (prevPage && page > 1) {
+      loadMembers(page - 1);
+    }
+  };
 
   return (
     <div className='bg-white text-[#6D5BD0] flex flex-col rounded-lg border border-gray-300'>
@@ -76,8 +93,8 @@ function page() {
             </div>  
           <div className="flex-1 flex flex-col overflow-auto">
             <div className=' overflow-auto flex flex-col flex-1'>
-              { members.map(item => (
-                <Result key={item.id} spotkania={spotkania} czlonek_imie={item.czlonek_imie} czlonek_email={item.czlonek_email}/>
+              { filteredMembers.map(item => (
+                <Result key={item.id} id={item.id} spotkania={spotkania} czlonek_imie={item.czlonek_imie} czlonek_email={item.czlonek_email}/>
               ))}
               
             </div>
@@ -89,18 +106,33 @@ function page() {
             wierwsze na strone: 10
           </div>
           <div>
-            
+            {1+(page-1)*10}-{members.length+(page-1)*10}
           </div>
           <div className='flex items-center gap-8'>
-            <Image src="/left.png" alt="Search Icon" width={5} height={5}  className='cursor-pointer transition duration-200 hover:brightness-60'/>
-            <Image src="/right.png" alt="Search Icon" width={5} height={5}  className='cursor-pointer transition duration-200 hover:brightness-60'/>
+            <Image 
+              src="/left.png" 
+              alt="Previous" 
+              width={5} 
+              height={5}  
+              onClick={handlePrev} 
+              className='cursor-pointer transition duration-200 hover:brightness-60'
+            />
+            <Image 
+              src="/right.png" 
+              alt="Next" 
+              width={5} 
+              height={5}  
+              onClick={handleNext} 
+              className='cursor-pointer transition duration-200 hover:brightness-60'
+            />
           </div>
         </div> 
         {isOpen && (
         <AddModal
               onClose={() => {
                 setIsOpen(false);
-                // loadMembers(page);
+                loadMembers(page);
+                loadSpotkania();       
               }}
         />
       )}

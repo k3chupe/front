@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState }  from 'react'
 import Image from 'next/image';
 
 type Props = {
@@ -17,7 +17,30 @@ type Props = {
   onDelete: (partner: any) => void;
 };
 
+type Status = {
+  id: number;
+  nazwa: string;
+  opis: string;
+};
+
+
 function result({ partner, onEdit, onDelete }: Props) {
+  const [statusy, setStatusy] = useState<Status[]>([]);
+  
+  useEffect(() => {
+    const fetchStatusy = async () => {
+      const res = await fetch("http://localhost:8000/api/slownik-statusow/");
+      const data = await res.json();
+      setStatusy(data.results);
+    };
+
+    fetchStatusy();
+  }, []);
+  const statusNazwa =
+    statusy.find(s => s.id === Number(partner.odpowiedz))?.nazwa
+    ?? partner.odpowiedz;
+
+
   return (
     <div className="">
       <div className=" border-b border-gray-200 p-2 px-4 grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] items-center gap-2 text-[#6E6893] min-w-[1000px]">
@@ -26,7 +49,8 @@ function result({ partner, onEdit, onDelete }: Props) {
         <div className='text-sm'>{partner.e_mail}</div>
         <div className='bg-[#CDFFCD] mr-auto px-1 rounded-[100px] flex items-center gap-1 text-sm pr-2'>
           <div className="w-[6px] h-[6px] bg-[#007F00] rounded-full"></div>
-          {partner.odpowiedz}
+          {statusNazwa}
+
         </div>
         
         <div className='text-sm'>{partner.osoba_odpowiedzialna}</div>

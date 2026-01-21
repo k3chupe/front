@@ -8,6 +8,20 @@ type ModalProps = {
   onClose: () => void
 };
 
+type Czlonek = {
+  id: number;
+  imie: string;
+  nazwisko: string;
+  e_mail: string;
+};
+
+type Partner = {
+  id: number;
+  nazwa: string;
+  e_mail: string;
+};
+
+
 function addModal({onClose}: ModalProps) {
   const [selectedNazwa, setSelectedNazwa] = useState("");
   const [selectedKwota, setSelectedKwota] = useState<number | "">("");
@@ -17,6 +31,15 @@ function addModal({onClose}: ModalProps) {
 
   const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const [czlonkowie, setCzlonkowie] = useState<Czlonek[]>([]);
+  const [showCzlonkowie, setShowCzlonkowie] = useState(false);
+  const [isLoadingCzlonkowie, setIsLoadingCzlonkowie] = useState(false);
+
+  const [partnerzy, setPartnerzy] = useState<Partner[]>([]);
+  const [showPartnerzy, setShowPartnerzy] = useState(false);
+  const [isLoadingPartnerzy, setIsLoadingPartnerzy] = useState(false);
+
 
   const options = [{nazwa: "Przychód", id: 1}, {nazwa:"Wydatek", id: 2}];
 
@@ -73,6 +96,30 @@ function addModal({onClose}: ModalProps) {
     }
   };
 
+  const fetchCzlonkowie = async () => {
+    try {
+      setIsLoadingCzlonkowie(true);
+      const res = await fetch("http://localhost:8000/api/czlonkowie/");
+      const data = await res.json();
+      setCzlonkowie(data.results);
+    } finally {
+      setIsLoadingCzlonkowie(false);
+    }
+  };
+
+  const fetchPartnerzy = async () => {
+    try {
+      setIsLoadingPartnerzy(true);
+      const res = await fetch("http://localhost:8000/api/partnerzy/");
+      const data = await res.json();
+      setPartnerzy(data.results);
+    } finally {
+      setIsLoadingPartnerzy(false);
+    }
+  };
+
+
+
   return (
     <div onClick={() => onClose()} className='fixed bg-black/50 inset-0 flex justify-center items-center'>
       <div className='bg-white flex flex-col p-6 rounded-lg' onClick={(e) => e.stopPropagation()}>
@@ -113,32 +160,108 @@ function addModal({onClose}: ModalProps) {
         />
         {errors.nazwa && <p className="text-red-500 text-sm mt-1">{errors.nazwa.join(" ")}</p>}
         
-        <input 
-        type="number"
-        placeholder="Podaj id osoby" 
-        className="border border-gray-300 rounded p-2 mt-2 w-full"
-        value={selectedId}
-        onChange={(e) =>
-          setSelectedId(
-            e.target.value === "" ? "" : Number(e.target.value)
-          )
-        }      
-        />
+        <div className="relative mt-2">
+          <input
+            type="text"
+            readOnly
+            placeholder="Osoba odpowiedzialna"
+            className="border border-gray-300 rounded p-2 w-full cursor-pointer"
+            value={
+              czlonkowie.find(c => c.id === selectedId)
+                ? `${czlonkowie.find(c => c.id === selectedId)!.imie} ${czlonkowie.find(c => c.id === selectedId)!.nazwisko}`
+                : ""
+            }
+            onClick={() => {
+              setShowCzlonkowie(!showCzlonkowie);
+              if (czlonkowie.length === 0) fetchCzlonkowie();
+            }}
+          />
+
+          {showCzlonkowie && (
+            <div className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full max-h-48 overflow-y-auto shadow-lg">
+              {isLoadingCzlonkowie && (
+                <div className="p-2 text-sm text-gray-500">Ładowanie...</div>
+              )}
+
+              {!isLoadingCzlonkowie &&
+                czlonkowie.map(c => (
+                  <div
+                    key={c.id}
+                    className="p-2 hover:bg-[#F4F2FF] cursor-pointer"
+                    onClick={() => {
+                      setSelectedId(c.id);
+                      setShowCzlonkowie(false);
+                    }}
+                  >
+                    <div className="font-medium">
+                      {c.imie} {c.nazwisko}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {c.e_mail}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+
+        {errors.osoba_odpowiedzialna && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.osoba_odpowiedzialna.join(" ")}
+          </p>
+        )}
+
         {errors.osoba_odpowiedzialna && <p className="text-red-500 text-sm mt-1">{errors.osoba_odpowiedzialna.join(" ")}</p>}
 
         {selectedType === 1 ?  
         <div>
-        <input 
-          type="number"
-          placeholder="Podaj id firmy" 
-          className="border border-gray-300 rounded p-2 mt-2 w-full"
-          value={selectedIdPartner}
-          onChange={(e) =>
-            setSelectedIdPartner(
-              e.target.value === "" ? "" : Number(e.target.value)
-            )
-          }      
-        />
+        <div className="relative mt-2">
+          <input
+            type="text"
+            readOnly
+            placeholder="Firma (partner)"
+            className="border border-gray-300 rounded p-2 w-full cursor-pointer"
+            value={
+              partnerzy.find(p => p.id === selectedIdPartner)
+                ? partnerzy.find(p => p.id === selectedIdPartner)!.nazwa
+                : ""
+            }
+            onClick={() => {
+              setShowPartnerzy(!showPartnerzy);
+              if (partnerzy.length === 0) fetchPartnerzy();
+            }}
+          />
+
+          {showPartnerzy && (
+            <div className="absolute z-10 bg-white border border-gray-300 rounded mt-1 w-full max-h-48 overflow-y-auto shadow-lg">
+              {isLoadingPartnerzy && (
+                <div className="p-2 text-sm text-gray-500">Ładowanie...</div>
+              )}
+
+              {!isLoadingPartnerzy &&
+                partnerzy.map(p => (
+                  <div
+                    key={p.id}
+                    className="p-2 hover:bg-[#F4F2FF] cursor-pointer"
+                    onClick={() => {
+                      setSelectedIdPartner(p.id);
+                      setShowPartnerzy(false);
+                    }}
+                  >
+                    <div className="font-medium">{p.nazwa}</div>
+                    <div className="text-xs text-gray-500">{p.e_mail}</div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+
+        {errors.id_partner && (
+          <p className="text-red-500 text-sm mt-1">
+            {errors.id_partner.join(" ")}
+          </p>
+        )}
+
           {errors.id_partner && <p className="text-red-500 text-sm mt-1">{errors.id_partner.join(" ")}</p>}
         </div>        
         
